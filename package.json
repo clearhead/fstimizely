@@ -1,0 +1,33 @@
+{
+  "name": "fstimizely",
+  "version": "0.0.0",
+  "description": "fstimizely->fs",
+  "main": "fstimizely.js",
+  "bin": {
+    "fstimizely": "./fstimizely.js"
+  },
+  "devDependencies": {
+    "request-json": "^0.4.10",
+    "q": "^1.0.1",
+    "q-io": "^1.11.2",
+    "rc": "^0.4.0",
+    "slug": "^0.5.0",
+    "colors": "^0.6.2",
+    "diff": "^1.0.8",
+    "sync-prompt": "^0.4.1",
+    "yes-no": "0.0.1"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/clearhead/fstimizely.git"
+  },
+  "author": "tomfuertes",
+  "license": "LICENSE-2.0.txt",
+  "bugs": {
+    "url": "https://github.com/clearhead/fstimizely/issues"
+  },
+  "homepage": "https://github.com/clearhead/fstimizely"
+}
