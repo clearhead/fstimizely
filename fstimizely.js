@@ -30,7 +30,8 @@ var
 /**
  * compares text / prints diff
  */
-var different = function (start, end) {
+var isDifferent = function (name, start, end) {
+  log(('\nDIFF: ' + name).blue);
   var diff = jsdiff.diffLines(start, end);
   var lastLine; // force newline print on lastLine
   diff.forEach(function (part) {
@@ -92,8 +93,7 @@ var getAnswer = function (q) {
 var conditionalWriteFile = function (name, txt) {
   fs.readFile(name, function (err, data) {
     if (err) data = '';
-    log(('DIFF: ' + name).blue);
-    if (different(data.toString(), txt)) {
+    if (isDifferent(name, data.toString(), txt)) {
       fs.writeFile(name, txt);
     }
   });
@@ -105,8 +105,7 @@ function getExperiments(eid) {
       function processGlobal(fileName, key) {
         fs.readFile(fileName, function (err, data) {
           if (err) return;
-          log(('DIFF: ' + fileName).blue);
-          if (different(experiment[key], data.toString())) {
+          if (isDifferent(fileName, experiment[key], data.toString())) {
             if (getAnswer('Upload diff to ' + fileName)) {
               var x = {};
               x[key] = data.toString();
@@ -136,8 +135,7 @@ function getVariations(eid) {
           var name = slug(variation.description).toLowerCase() + '.js';
           fs.readFile(name, function (err, data) {
             if (err) return;
-            log(('DIFF: ' + name).blue);
-            if (different(variation.js_component, data.toString())) {
+            if (isDifferent(name, variation.js_component, data.toString())) {
               if (getAnswer('Upload diff to ' + name)) {
                 variation.js_component = data.toString();
                 put('variations/' + variation.id, variation).then(function () {
