@@ -31,7 +31,7 @@ var
  * compares text / prints diff
  */
 var isDifferent = function (name, start, end) {
-  log(('\nDIFF: ' + name).blue);
+  log(('\nDIFF: ' + name + ' ->').blue);
   var diff = jsdiff.diffLines(start, end);
   var lastLine; // force newline print on lastLine
   diff.forEach(function (part) {
