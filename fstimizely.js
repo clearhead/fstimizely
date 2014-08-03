@@ -2,9 +2,9 @@
 
 var UPLOAD = process.argv[2] === 'up';
 
-var request = require('request-json');
+var optimizely = require('./lib/optimizely');
+
 var fs = require('fs');
-var Q = require('q');
 var slug = require('slug');
 var conf = require('rc')('fstimizely', {});
 var prompt = require('sync-prompt').prompt;
@@ -59,29 +59,7 @@ Object.keys(conf).forEach(function (key) {
 if (!conf.api_token) throw new Error('.fstimizelyrc api_token missing');
 if (!conf.experiment_id) throw new Error('.fstimizelyrc experiment_id missing');
 
-var client = request.newClient('https://www.optimizelyapis.com/experiment/v1/', {
-  headers: {
-    'Token': conf.api_token
-  },
-  rejectUnauthorized: false
-});
-
-var get = function (url) {
-  var defer = Q.defer();
-  client.get(url, function (err, res, body) {
-    if (err || res.statusCode !== 200) defer.reject(err || body);
-    else defer.resolve(body);
-  });
-  return defer.promise;
-};
-var put = function (url, data) {
-  var defer = Q.defer();
-  client.put(url, data, function (err, res, body) {
-    if (err) defer.reject(err);
-    else defer.resolve(body);
-  });
-  return defer.promise;
-};
+optimizely.init(conf.api_token);
 
 var getAnswer = function (q) {
   var a = prompt(q + '? [y/N]: ');
@@ -100,7 +78,7 @@ var conditionalWriteFile = function (name, txt) {
 };
 
 function getExperiments(eid) {
-  get('experiments/' + eid + '/')
+  optimizely.getExperiments(eid);
     .then(function (experiment) {
       function processGlobal(fileName, key) {
         fs.readFile(fileName, function (err, data) {
@@ -109,7 +87,7 @@ function getExperiments(eid) {
             if (getAnswer('Upload diff to ' + fileName)) {
               var x = {};
               x[key] = data.toString();
-              put('experiments/' + experiment.id, x, log).then(function () {
+              optimizely.put('experiments/' + experiment.id, x, log).then(function () {
                 log('Uploaded to: https://www.optimizely.com/edit?experiment_id=' + eid);
               });
             }
@@ -128,7 +106,7 @@ function getExperiments(eid) {
 }
 
 function getVariations(eid) {
-  get('experiments/' + eid + '/variations/')
+  optimizely.get('experiments/' + eid + '/variations/')
     .then(function (variations) {
       if (UPLOAD) {
         variations.forEach(function (variation) {
@@ -138,7 +116,7 @@ function getVariations(eid) {
             if (isDifferent(name, variation.js_component, data.toString())) {
               if (getAnswer('Upload diff to ' + name)) {
                 variation.js_component = data.toString();
-                put('variations/' + variation.id, variation).then(function () {
+                optimizely.put('variations/' + variation.id, variation).then(function () {
                   log('Uploaded to: https://www.optimizely.com/edit?experiment_id=' + eid);
                 });
               }

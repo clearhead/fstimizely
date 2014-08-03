@@ -1,0 +1,4 @@
+; conf.projects[project_id] = api_key
+
+[projects]
+  1234567890 = abcdefghijklmnopqrstuvwxyz:123456
