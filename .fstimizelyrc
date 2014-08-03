@@ -1,7 +1,1 @@
-{
-  // https://www.optimizely.com/tokens
-  "api_token": "abcdefghijklmnopqrstuvwxyz:123456",
-
-  // https://www.optimizely.com/edit?experiment_id=123456789
-  "experiment_id": "1234567890"
-}
+experiment_id=1451760292
