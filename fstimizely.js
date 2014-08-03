@@ -14,35 +14,49 @@ var git = require('git-promise');
 var gitUtil = require('git-promise/util');
 require('colors');
 
-var log = function () {
-  if (arguments[0] !== undefined)
-    console.log(arguments[0]);
-};
+/**
+ * globals
+ */
+var
+  log = function () {
+    if (arguments[0] !== undefined)
+      console.log(arguments[0]);
+  },
+  onError = function (err) {
+    log('ERROR :( / Docs: https://github.com/clearhead/fstimizely');
+    log(err);
+  };
 
-var onError = function (err) {
-  log('ERROR :( / Docs: https://github.com/tomfuertes/opthub');
-  log(err);
-};
-
+/**
+ * compares text / prints diff
+ */
 var different = function (start, end) {
-  // log(start, end);
   var diff = jsdiff.diffLines(start, end);
-  var lastLine;
+  var lastLine; // force newline print on lastLine
   diff.forEach(function (part) {
-    // green for additions, red for deletions
-    // grey for common parts
     var color = part.added ? 'green' :
       part.removed ? 'red' : 'grey';
     process.stderr.write(part.value[color]);
     lastLine = part;
   });
-  if (!lastLine.value.match(/\n$/))
-    console.log('\n');
+  if (!lastLine.value.match(/\n$/)) console.log('\n');
   return start != end; // jshint ignore:line
 };
 
-if (!conf.api_token) throw new Error('.opthubrc needs to have an api_token');
-if (!conf.experiment_id) throw new Error('.opthubrc needs to have an experiment_id');
+/**
+ * Token API for multiple projects
+ * cat ~/.fstimizelyrc # {'tokens': {'$name':'$token'}}
+ * cat ./.fstimizelyrc # {'$name':'$experiment_id'}
+ */
+if (!conf.tokens) throw new Error('.fstimizelyrc requires tokens object');
+Object.keys(conf).forEach(function (key) {
+  if (['_', 'config', 'tokens'].indexOf(key) === -1) {
+    conf.api_token = conf.tokens[key];
+    conf.experiment_id = conf[key];
+  }
+});
+if (!conf.api_token) throw new Error('.fstimizelyrc api_token missing');
+if (!conf.experiment_id) throw new Error('.fstimizelyrc experiment_id missing');
 
 var client = request.newClient('https://www.optimizelyapis.com/experiment/v1/', {
   headers: {
@@ -54,7 +68,7 @@ var client = request.newClient('https://www.optimizelyapis.com/experiment/v1/', 
 var get = function (url) {
   var defer = Q.defer();
   client.get(url, function (err, res, body) {
-    if (err) defer.reject(err);
+    if (err || res.statusCode !== 200) defer.reject(err || body);
     else defer.resolve(body);
   });
   return defer.promise;
@@ -78,7 +92,7 @@ var getAnswer = function (q) {
 var conditionalWriteFile = function (name, txt) {
   fs.readFile(name, function (err, data) {
     if (err) data = '';
-    log(('############ diff of ' + name + ' ############').blue);
+    log(('DIFF: ' + name).blue);
     if (different(data.toString(), txt)) {
       fs.writeFile(name, txt);
     }
@@ -91,6 +105,7 @@ function getExperiments(eid) {
       function processGlobal(fileName, key) {
         fs.readFile(fileName, function (err, data) {
           if (err) return;
+          log(('DIFF: ' + fileName).blue);
           if (different(experiment[key], data.toString())) {
             if (getAnswer('Upload diff to ' + fileName)) {
               var x = {};
@@ -121,6 +136,7 @@ function getVariations(eid) {
           var name = slug(variation.description).toLowerCase() + '.js';
           fs.readFile(name, function (err, data) {
             if (err) return;
+            log(('DIFF: ' + name).blue);
             if (different(variation.js_component, data.toString())) {
               if (getAnswer('Upload diff to ' + name)) {
                 variation.js_component = data.toString();
