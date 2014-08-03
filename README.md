@@ -12,34 +12,40 @@ npm install -g fstimizely
 ## Hello World ##
 
 ```bash
-$ cd ~/sandbox/git-repos/ab-tests/text-foo
+$ cd ~/sandbox/git-repos/ab-tests/test-foo
 
-$ cat ./.fstimizelyrc
-{
-  "api_token": "abcdefghijklmnopqrstuvwxyz:123456",    // https://www.optimizely.com/tokens
-  "experiment_id": "1234567890" // https://www.optimizely.com/edit?experiment_id=123456789
-}
+# tokens stored in ~/.fstimizelyrc and mapped via key
+#   in local ./.fstimizelyrc to navigate multiple accounts
+$ echo 'my_token_ref=1234567890' > .fstimizelyrc
+$ echo -e '[tokens]\n  my_token_ref=abcdefghijklmnopqrstuvwxyz:123456' > ~/.fstimizelyrc
 
+# download the experiment!
 $ fstimizely
 
 ############ diff of original.js ############
 // control code
-Write diff to original.js? [Y/n]:
 
 ############ diff of variation-1.js ############
 // variation 1 code
-Write diff to variation-1.js? [Y/n]:
 
 ############ diff of global.js ############
 // experiment 1234567890's global js
-Write diff to global.js? [Y/n]:
 
 ############ diff of global.css ############
 /* // experiment 1234567890's global css */
-Write diff to global.css? [Y/n]:
 
+$ git status --porcelain
+?? global.css
+?? global.js
+?? original.js
+?? variation-1.js
+
+# version control or what's the point
+$ git add . && git commit -m "downloaded experiment"
+
+# now edit the code, commit, and re-upload!
 $ echo '// change' > variation-1.js
-
+$ git add . && git commit -m "changed variation code"
 $ fstimizely up
 
 ############ diff of original.js ############
@@ -48,7 +54,7 @@ $ fstimizely up
 ############ diff of variation-1.js ############
 - // variation 1 code
 + // change
-Upload to variation-1.js? [Y/n]:
+Upload to variation-1.js? [n/Y]:
 
 ############ diff of global.js ############
 // experiment 1234567890's global js
