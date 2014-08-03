@@ -80,8 +80,7 @@ var conditionalWriteFile = function (name, txt) {
     if (err) data = '';
     log(('############ diff of ' + name + ' ############').blue);
     if (different(data.toString(), txt)) {
-      if (getAnswer('Write diff to ' + name))
-        fs.writeFile(name, txt);
+      fs.writeFile(name, txt);
     }
   });
 };
