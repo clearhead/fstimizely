@@ -1,12 +1,12 @@
 {
   "name": "fstimizely",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "fstimizely->fs",
   "main": "fstimizely.js",
   "bin": {
     "fstimizely": "./fstimizely.js"
   },
-  "devDependencies": {
+  "dependencies": {
     "colors": "^0.6.2",
     "diff": "^1.0.8",
     "git-promise": "^0.2.0",
