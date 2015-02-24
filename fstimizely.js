@@ -18,7 +18,7 @@ require('colors');
  * note: overarchitected for prep to move to account level sync
  */
 var API_TOKEN, EXPERIMENT_ID; // ewww
-(function () {
+(function() {
   var conf = require('rc')('fstimizely', {});
   if (!conf.tokens) throw new Error('.fstimizelyrc requires tokens object');
   Object.keys(conf).forEach(function (key) {
@@ -47,7 +47,7 @@ git('status --porcelain', gitUtil.extractStatus)
       }
     });
     return true;
-  }).then(function () { // Yay now we can run!
+  }).then(function() { // Yay now we can run!
     // globaljs and css
     optimizely.getExperiment(EXPERIMENT_ID)
       .then(function (experiment) {
@@ -76,7 +76,7 @@ git('status --porcelain', gitUtil.extractStatus)
  * @param  {string} key      key on object to check
  */
 function writeOrUpload(obj, url, fileName, key) {
-  fs.readFile(fileName, function (err, data) {
+  fs.readFile(fileName, function(err, data) {
     // if in upload mode, confirm then
     //  modify put {`key`: `fsText`} to `url`
     if (UPLOAD) {
@@ -86,7 +86,7 @@ function writeOrUpload(obj, url, fileName, key) {
         if (getAnswer('Upload diff to ' + fileName)) { // sync / needs to be nested
           var stingy = {};
           stingy[key] = data;
-          optimizely.put(url, stingy).then(function () {
+          optimizely.put(url, stingy).then(function() {
             console.log('Uploaded to: https://www.optimizely.com/edit?experiment_id=' + EXPERIMENT_ID);
           });
         }
@@ -113,14 +113,14 @@ function isDifferent(name, start, end) {
   console.log(('\nDIFF: ' + name + ' ->').blue);
   var diff = jsdiff.diffLines(start, end);
   var lastLine; // force newline print on lastLine
-  diff.forEach(function (part) {
+  diff.forEach(function(part) {
     var color = part.added ? 'green' :
       part.removed ? 'red' : 'grey';
     process.stderr.write(part.value[color]);
     lastLine = part;
   });
   if (!lastLine.value.match(/\n$/)) console.log('\n');
-  return start !== end; // jshint ignore:line
+  return start !== end;
 }
 
 /**
