@@ -129,7 +129,7 @@ function isDifferent(name, start, end) {
  * @return {Boolean}   answer
  */
 function getAnswer(q) {
-  var prompt = require('sync-prompt').prompt;
+  var prompt = require('readline-sync').question;
   var yesNo = require('yes-no').parse;
   var a = prompt(q + '? [y/N]: ');
   if (a === '') a = false;
