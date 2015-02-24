@@ -120,7 +120,7 @@ function isDifferent(name, start, end) {
     lastLine = part;
   });
   if (!lastLine.value.match(/\n$/)) console.log('\n');
-  return start != end; // jshint ignore:line
+  return start !== end; // jshint ignore:line
 }
 
 /**
@@ -129,9 +129,10 @@ function isDifferent(name, start, end) {
  * @return {Boolean}   answer
  */
 function getAnswer(q) {
-  var prompt = require('readline-sync').question;
+  console.log('here');
+  var prompt = require('readline-sync');
   var yesNo = require('yes-no').parse;
-  var a = prompt(q + '? [y/N]: ');
+  var a = prompt.question(q + '? [y/N]: ');
   if (a === '') a = false;
   else a = yesNo(a);
   return a;
