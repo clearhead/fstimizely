@@ -20,8 +20,8 @@ require('colors');
 var API_TOKEN, EXPERIMENT_ID; // ewww
 (function() {
   var conf = require('rc')('fstimizely', {});
-  Object.keys(conf).forEach(function (key) {
   if (!conf.tokens) logErrorAndExit('.fstimizelyrc requires tokens object');
+  Object.keys(conf).forEach(function(key) {
     if (['_', 'config', 'tokens'].indexOf(key) === -1) {
       API_TOKEN = conf.tokens[key];
       EXPERIMENT_ID = conf[key];
@@ -37,8 +37,8 @@ var optimizely = new Optimizely(API_TOKEN);
  * you're on a clean git tree
  */
 git('status --porcelain', gitUtil.extractStatus)
-  .then(function (status) {
-    ['modified', 'added', 'deleted', 'renamed', 'copied'].forEach(function (b) {
+  .then(function(status) {
+    ['modified', 'added', 'deleted', 'renamed', 'copied'].forEach(function(b) {
       if (status.workingTree[b].length) {
         logErrorAndExit('dirty git tree - please stash/commit first');
       }
@@ -126,7 +126,6 @@ function isDifferent(name, start, end) {
  * @return {Boolean}   answer
  */
 function getAnswer(q) {
-  console.log('here');
   var prompt = require('readline-sync');
   var yesNo = require('yes-no').parse;
   var a = prompt.question(q + '? [y/N]: ');
