@@ -46,18 +46,24 @@ git('status --porcelain', gitUtil.extractStatus)
     return true;
   }).then(function() { // Yay now we can run!
     // globaljs and css
-    optimizely.getExperiment(EXPERIMENT_ID)
-      .then(function (experiment) {
+    return optimizely.getExperiment(EXPERIMENT_ID)
+      .then(function(experiment) {
+        console.log(experiment);
+        if (experiment.status === 'Running') {
+          logErrorAndExit('experiment running! please use the editor to edit\n' +
+            'https://www.optimizely.com/edit?experiment_id=' + EXPERIMENT_ID);
+        }
         writeOrUpload(experiment, 'experiments/' + experiment.id, 'global.js', 'custom_js');
         writeOrUpload(experiment, 'experiments/' + experiment.id, 'global.css', 'custom_css');
-      });
-    // variation js
-    optimizely.getVariations(EXPERIMENT_ID)
-      .then(function (variations) {
-        variations.forEach(function (variation) {
-          writeOrUpload(variation, 'variations/' + variation.id,
-            slug(variation.description).toLowerCase() + '.js', 'js_component');
-        });
+        // variation js
+        return optimizely.getVariations(EXPERIMENT_ID)
+          .then(function(variations) {
+            variations.forEach(function(variation) {
+              writeOrUpload(variation, 'variations/' + variation.id,
+                slug(variation.description).toLowerCase() + '.js', 'js_component');
+            });
+            return true;
+          });
       });
   });
 
@@ -85,6 +91,7 @@ function writeOrUpload(obj, url, fileName, key) {
           stingy[key] = data;
           optimizely.put(url, stingy).then(function() {
             console.log('Uploaded to: https://www.optimizely.com/edit?experiment_id=' + EXPERIMENT_ID);
+            return true;
           });
         }
       }
