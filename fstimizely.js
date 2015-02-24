@@ -20,15 +20,15 @@ require('colors');
 var API_TOKEN, EXPERIMENT_ID; // ewww
 (function() {
   var conf = require('rc')('fstimizely', {});
-  if (!conf.tokens) throw new Error('.fstimizelyrc requires tokens object');
   Object.keys(conf).forEach(function (key) {
+  if (!conf.tokens) logErrorAndExit('.fstimizelyrc requires tokens object');
     if (['_', 'config', 'tokens'].indexOf(key) === -1) {
       API_TOKEN = conf.tokens[key];
       EXPERIMENT_ID = conf[key];
     }
   });
-  if (!API_TOKEN) throw new Error('.fstimizelyrc api_token missing');
-  if (!EXPERIMENT_ID) throw new Error('.fstimizelyrc experiment_id missing');
+  if (!API_TOKEN) logErrorAndExit('.fstimizelyrc api_token missing');
+  if (!EXPERIMENT_ID) logErrorAndExit('.fstimizelyrc experiment_id missing');
 })();
 var optimizely = new Optimizely(API_TOKEN);
 
@@ -38,12 +38,9 @@ var optimizely = new Optimizely(API_TOKEN);
  */
 git('status --porcelain', gitUtil.extractStatus)
   .then(function (status) {
-    var err;
     ['modified', 'added', 'deleted', 'renamed', 'copied'].forEach(function (b) {
       if (status.workingTree[b].length) {
-        err = 'dirty git tree - please stash/commit first';
-        console.error(err.red);
-        throw err;
+        logErrorAndExit('dirty git tree - please stash/commit first');
       }
     });
     return true;
@@ -136,4 +133,9 @@ function getAnswer(q) {
   if (a === '') a = false;
   else a = yesNo(a);
   return a;
+}
+
+function logErrorAndExit(str) {
+  console.error(str.red);
+  throw str;
 }
