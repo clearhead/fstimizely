@@ -48,7 +48,6 @@ git('status --porcelain', gitUtil.extractStatus)
     // globaljs and css
     return optimizely.getExperiment(EXPERIMENT_ID)
       .then(function(experiment) {
-        console.log(experiment);
         if (experiment.status === 'Running') {
           logErrorAndExit('experiment running! please use the editor to edit\n' +
             'https://www.optimizely.com/edit?experiment_id=' + EXPERIMENT_ID);
