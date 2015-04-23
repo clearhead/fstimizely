@@ -2,12 +2,12 @@
 
 var UPLOAD = process.argv[2] === 'up';
 
-var Optimizely = require('./lib/optimizely');
-
 var fs = require('fs');
 var slug = require('slug');
 var git = require('git-promise');
 var gitUtil = require('git-promise/util');
+var optimizely = require('optimizely-node');
+var inquirer = require('inquirer');
 require('colors');
 
 /**
@@ -30,7 +30,8 @@ var API_TOKEN, EXPERIMENT_ID; // ewww
   if (!API_TOKEN) logErrorAndExit('.fstimizelyrc api_token missing');
   if (!EXPERIMENT_ID) logErrorAndExit('.fstimizelyrc experiment_id missing');
 })();
-var optimizely = new Optimizely(API_TOKEN);
+
+optimizely = optimizely(API_TOKEN);
 
 /**
  * Avoid losing non-commited changes by failing unless
@@ -48,10 +49,10 @@ git('status --porcelain', gitUtil.extractStatus)
     // globaljs and css
     return optimizely.getExperiment(EXPERIMENT_ID)
       .then(function(experiment) {
-        if (experiment.status === 'Running') {
-          logErrorAndExit('experiment running! please use the editor to edit\n' +
-            'https://www.optimizely.com/edit?experiment_id=' + EXPERIMENT_ID);
-        }
+        // if (experiment.status === 'Running') {
+        //   logErrorAndExit('experiment running! please use the editor to edit\n' +
+        //     'https://www.optimizely.com/edit?experiment_id=' + EXPERIMENT_ID);
+        // }
         writeOrUpload(experiment, 'experiments/' + experiment.id, 'global.js', 'custom_js');
         writeOrUpload(experiment, 'experiments/' + experiment.id, 'global.css', 'custom_css');
         // variation js
@@ -82,26 +83,34 @@ function writeOrUpload(obj, url, fileName, key) {
     // if in upload mode, confirm then
     //  modify put {`key`: `fsText`} to `url`
     if (UPLOAD) {
-      if (err) return;
-      data = data.toString(); // idk
-      if (isDifferent(fileName, obj[key], data)) {
-        if (getAnswer('Upload diff to ' + fileName)) { // sync / needs to be nested
-          var stingy = {};
-          stingy[key] = data;
-          optimizely.put(url, stingy).then(function() {
-            console.log('Uploaded to: https://www.optimizely.com/edit?experiment_id=' + EXPERIMENT_ID);
-            return true;
-          });
-        }
-      }
+      upload(err, data, url, fileName, obj, key);
     } else {
       // Print diff of obj[key] and fileText & write file
-      if (err) data = '';
-      if (isDifferent(fileName, data.toString(), obj[key])) {
-        fs.writeFile(fileName, obj[key]);
-      }
+      write(err, data, fileName, obj, key);
     }
   });
+}
+
+function upload(err, data, url, fileName, obj, key) {
+  if (err) return;
+  data = data.toString(); // idk
+  if (isDifferent(fileName, obj[key], data)) {
+    return asyncAnswer('Upload diff to ' + fileName, function() {
+      var stingy = {};
+      stingy[key] = data;
+      optimizely.put(url, stingy).then(function() {
+        console.log('Uploaded to: https://www.optimizely.com/edit?experiment_id=' + EXPERIMENT_ID);
+        return true;
+      });
+    });
+  }
+}
+
+function write(err, data, fileName, obj, key) {
+  if (err) data = '';
+  if (isDifferent(fileName, data.toString(), obj[key])) {
+    fs.writeFile(fileName, obj[key]);
+  }
 }
 
 /**
@@ -114,30 +123,34 @@ function writeOrUpload(obj, url, fileName, key) {
 function isDifferent(name, start, end) {
   var jsdiff = require('diff');
   console.log(('\nDIFF: ' + name + ' ->').blue);
-  var diff = jsdiff.diffLines(start, end);
-  var lastLine; // force newline print on lastLine
-  diff.forEach(function(part) {
-    var color = part.added ? 'green' :
-      part.removed ? 'red' : 'grey';
-    process.stderr.write(part.value[color]);
-    lastLine = part;
-  });
-  if (!lastLine.value.match(/\n$/)) console.log('\n');
+  console.log('\n');
+  if (start !== end) {
+    var diff = jsdiff.diffLines(start, end);
+    diff.forEach(function(part) {
+      var color = part.added ? 'green' :
+        part.removed ? 'red' : 'grey';
+      process.stderr.write(part.value[color]);
+    });
+  } else {
+    console.log('same!'.grey);
+  }
+  console.log('\n');
   return start !== end;
 }
 
 /**
  * prompt for an answer
  * @param  {string} q question to ask [y/N]?
- * @return {Boolean}   answer
+ * @param  {function} callback(true|false)
  */
-function getAnswer(q) {
-  var prompt = require('readline-sync');
-  var yesNo = require('yes-no').parse;
-  var a = prompt.question(q + '? [y/N]: ');
-  if (a === '') a = false;
-  else a = yesNo(a);
-  return a;
+function asyncAnswer(q, callback) {
+  inquirer.prompt([{
+    type: 'confirm',
+    name: 'q',
+    message: q
+  }], function(answers) {
+    if (answers.q) callback(true);
+  });
 }
 
 function logErrorAndExit(str) {
