@@ -1,4 +1,7 @@
-; conf.projects[project_id] = api_key
-
+; ~/.fstimizelyrc: (key/value api not in source control)
 [tokens]
-  1234567890 = abcdefghijklmnopqrstuvwxyz:123456
+  clientA=qwertyuiopasdfghjklzxcvbnm:123456789
+  clientB=mnbvcxzlkjhgfdsapoiuytrewq:123456789
+
+; ./.fstimizelyrc: (key/value experiment id in source control)
+clientA=1234567890
