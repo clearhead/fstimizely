@@ -12,23 +12,27 @@ require('colors');
 
 /**
  * Token API for multiple projects
- * cat ~/.fstimizelyrc # {'tokens': {'$name':'$token'}}
- * cat ./.fstimizelyrc # {'$name':'$experiment_id'}
+ * cat ~/.fstimizelyrc # {'tokens': {'${name}':'${token}'}}
+ * cat ./.fstimizelyrc # {'${name}':'${experiment_id}'}
  *
- * note: overarchitected for prep to move to account level sync
+ * note: overarchitected if you're using only single account, but
+ * we're an agency so :shrug:
  */
 var API_TOKEN, EXPERIMENT_ID; // ewww
 (function() {
   var conf = require('rc')('fstimizely', {});
-  if (!conf.tokens) logErrorAndExit('.fstimizelyrc requires tokens object');
+  if (!conf.tokens)
+      logErrorAndExit('.fstimizelyrc requires tokens object');
   Object.keys(conf).forEach(function(key) {
     if (['_', 'config', 'tokens'].indexOf(key) === -1) {
       API_TOKEN = conf.tokens[key];
       EXPERIMENT_ID = conf[key];
     }
   });
-  if (!API_TOKEN) logErrorAndExit('.fstimizelyrc api_token missing');
-  if (!EXPERIMENT_ID) logErrorAndExit('.fstimizelyrc experiment_id missing');
+  if (!API_TOKEN)
+     logErrorAndExit('.fstimizelyrc api_token missing');
+  if (!EXPERIMENT_ID)
+    logErrorAndExit('.fstimizelyrc experiment_id missing');
 })();
 var optimizely = new Optimizely(API_TOKEN);
 
