@@ -1,6 +1,6 @@
 {
   "name": "fstimizely",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "fstimizely->fs",
   "main": "fstimizely.js",
   "bin": {
