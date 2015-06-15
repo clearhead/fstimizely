@@ -1,6 +1,7 @@
 #! /usr/bin/env node
 
 var UPLOAD = process.argv[2] === 'up';
+var FORCE = process.argv[3] === '--force'; // TODO: Better flags
 
 var Optimizely = require('./lib/optimizely');
 
@@ -52,9 +53,11 @@ git('status --porcelain', gitUtil.extractStatus)
     // globaljs and css
     return optimizely.getExperiment(EXPERIMENT_ID)
       .then(function(experiment) {
-        if (experiment.status === 'Running') {
-          logErrorAndExit('experiment running! please use the editor to edit\n' +
-            'https://www.optimizely.com/edit?experiment_id=' + EXPERIMENT_ID);
+        if (experiment.status === 'Running' && !FORCE) {
+          logErrorAndExit('experiment running! \n'+
+            '1) use the `fstimizely up --force` OR \n' +
+            '2) the editor to edit\n' +
+            '  https://www.optimizely.com/edit?experiment_id=' + EXPERIMENT_ID);
         }
         writeOrUpload(experiment, 'experiments/' + experiment.id, 'global.js', 'custom_js');
         writeOrUpload(experiment, 'experiments/' + experiment.id, 'global.css', 'custom_css');
