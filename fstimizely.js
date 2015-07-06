@@ -22,8 +22,8 @@ require('colors');
  */
 var API_TOKEN, EXPERIMENT_ID; // ewww
 (function() {
-  var local = fs.readFileSync('./.fstimizelyrc').toString();
-  var key = local.trim().split('=')[1];
+  var local = fs.readFileSync('./.fstimizelyrc').toString().trim();
+  var key = local.split('=')[0];
   if (!conf.tokens){
     logErrorAndExit('.fstimizelyrc requires tokens object');
   }
