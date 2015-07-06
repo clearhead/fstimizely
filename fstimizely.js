@@ -1,7 +1,8 @@
-#! /usr/bin/env node
+#!/usr/bin/env node
 
-var UPLOAD = process.argv[2] === 'up';
-var FORCE = process.argv[3] === '--force'; // TODO: Better flags
+var argv = require('minimist')(process.argv.slice(2));
+var UPLOAD = argv._ && argv._[0] === 'up';
+var FORCE = !!argv.force; // TODO: Better flags
 
 var Optimizely = require('./lib/optimizely');
 
