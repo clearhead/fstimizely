@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-var argv = require('minimist')(process.argv.slice(2));
-var UPLOAD = argv._ && argv._[0] === 'up';
-var FORCE = !!argv.force; // TODO: Better flags
+var conf = require('rc')('fstimizely', {});
+var UPLOAD = conf._ && conf._[0] === 'up';
+var FORCE = !!conf.force;
 
 var Optimizely = require('./lib/optimizely');
 
@@ -22,15 +22,13 @@ require('colors');
  */
 var API_TOKEN, EXPERIMENT_ID; // ewww
 (function() {
-  var conf = require('rc')('fstimizely', {});
-  if (!conf.tokens)
+  var local = fs.readFileSync('./.fstimizelyrc').toString();
+  var key = local.trim().split('=')[1];
+  if (!conf.tokens){
     logErrorAndExit('.fstimizelyrc requires tokens object');
-  Object.keys(conf).forEach(function(key) {
-    if (['_', 'config', 'tokens'].indexOf(key) === -1) {
-      API_TOKEN = conf.tokens[key];
-      EXPERIMENT_ID = conf[key];
-    }
-  });
+  }
+  API_TOKEN = conf.tokens[key];
+  EXPERIMENT_ID = conf[key];
   if (!API_TOKEN)
     logErrorAndExit('.fstimizelyrc api_token missing');
   if (!EXPERIMENT_ID)
